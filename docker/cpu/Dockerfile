@@ -1,7 +1,6 @@
 FROM --platform=linux/arm64 python:3.10-slim
 
 # Install all required packages in a single RUN command to minimize layers
-# Each package installation is joined with && and line continuations (\)
 RUN apt-get update && apt-get install -y --no-install-recommends \
     espeak-ng \
     git \
@@ -13,14 +12,12 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 # Run diagnostic commands to verify our architecture
-# All commands are part of a single RUN instruction
 RUN echo "Architecture details:" && \
     uname -a && \
     file /bin/ls && \
     dpkg --print-architecture
 
 # Install uv with verification steps
-# Using a single RUN command for the entire installation process
 RUN mkdir -p /tmp/uv && \
     cd /tmp/uv && \
     echo "Downloading uv for ARM64..." && \
@@ -63,19 +60,15 @@ WORKDIR /app
 COPY --chown=appuser:appuser pyproject.toml ./pyproject.toml
 
 # Install dependencies using pip for initial setup
-# Each command is connected with && and uses line continuations
+# We use pyproject.toml directly instead of requirements.txt
 RUN python -m pip install --user pip uv && \
     echo "UV path: $(which uv)" && \
     $HOME/.local/bin/uv venv && \
     . .venv/bin/activate && \
-    $HOME/.local/bin/uv pip install --no-deps -r requirements.txt
+    $HOME/.local/bin/uv pip install -e .
 
 # Copy project files
 COPY --chown=appuser:appuser api ./api
-
-# Install project
-RUN . .venv/bin/activate && \
-    $HOME/.local/bin/uv pip install -e .
 
 # Set environment variables
 ENV PYTHONUNBUFFERED=1
