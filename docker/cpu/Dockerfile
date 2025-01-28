@@ -1,4 +1,4 @@
-FROM python:3.10-slim
+FROM --platform=linux/arm64 python:3.10-slim
 
 # Install dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -10,13 +10,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-
-COPY --chown=appuser:appuser ../api ./api
-# Install uv
-RUN curl -LO https://github.com/astral-sh/uv/releases/latest/download/uv-aarch64-unknown-linux-gnu.tar.gz && \
-    tar xzf uv-aarch64-unknown-linux-gnu.tar.gz && \
-    mv uv /bin/ && \
-    rm uv-aarch64-unknown-linux-gnu.tar.gz
+# Install uv using the official installer script
+RUN curl --proto '=https' --tlsv1.2 -LsSf https://github.com/astral-sh/uv/releases/download/0.5.24/uv-installer.sh | sh
 
 # Create non-root user
 RUN useradd -m -u 1000 appuser
