@@ -10,9 +10,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-# Install uv using the official installer script and ensure it's in PATH
-RUN curl --proto '=https' --tlsv1.2 -LsSf https://github.com/astral-sh/uv/releases/download/0.5.24/uv-installer.sh | sh && \
-    ln -s /root/.cargo/bin/uv /usr/local/bin/uv
+# Install uv and set permissions
+RUN curl -L https://github.com/astral-sh/uv/releases/download/0.5.24/uv-aarch64-unknown-linux-gnu.tar.gz | tar xz && \
+    mv uv /usr/local/bin/ && \
+    chmod +x /usr/local/bin/uv
 
 # Create non-root user
 RUN useradd -m -u 1000 appuser
@@ -20,7 +21,8 @@ RUN useradd -m -u 1000 appuser
 # Create directories and set ownership
 RUN mkdir -p /app/models && \
     mkdir -p /app/api/src/voices && \
-    chown -R appuser:appuser /app
+    chown -R appuser:appuser /app && \
+    chmod 755 /usr/local/bin/uv
 
 USER appuser
 
