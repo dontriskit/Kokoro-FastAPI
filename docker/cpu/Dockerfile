@@ -11,10 +11,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 # Install uv and set permissions
-RUN curl -L https://github.com/astral-sh/uv/releases/download/0.5.24/uv-aarch64-unknown-linux-gnu.tar.gz | tar xz && \
+RUN curl -L https://github.com/astral-sh/uv/releases/download/0.5.24/uv-aarch64-unknown-linux-gnu.tar.gz | tar xz --strip-components=1 && \
     mv uv /usr/local/bin/ && \
     chmod +x /usr/local/bin/uv
-
 # Create non-root user
 RUN useradd -m -u 1000 appuser
 
