@@ -13,7 +13,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 COPY --chown=appuser:appuser ../api ./api
 # Install uv
-COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
+RUN curl -LO https://github.com/astral-sh/uv/releases/latest/download/uv-aarch64-unknown-linux-gnu.tar.gz && \
+    tar xzf uv-aarch64-unknown-linux-gnu.tar.gz && \
+    mv uv /bin/ && \
+    rm uv-aarch64-unknown-linux-gnu.tar.gz
 
 # Create non-root user
 RUN useradd -m -u 1000 appuser
