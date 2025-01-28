@@ -1,24 +1,28 @@
 FROM --platform=linux/arm64 python:3.10-slim
 
-# First, install diagnostic tools along with other dependencies
+# Install all required packages in a single RUN command to minimize layers
+# Each package installation is joined with && and line continuations (\)
 RUN apt-get update && apt-get install -y --no-install-recommends \
     espeak-ng \
     git \
     libsndfile1 \
     curl \
     ffmpeg \
-    file \   # Added this for our diagnostics
+    file \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-# Now we can safely run our diagnostic commands
+# Run diagnostic commands to verify our architecture
+# All commands are part of a single RUN instruction
 RUN echo "Architecture details:" && \
     uname -a && \
     file /bin/ls && \
     dpkg --print-architecture
 
-# Install uv with verification
-RUN mkdir -p /tmp/uv && cd /tmp/uv && \
+# Install uv with verification steps
+# Using a single RUN command for the entire installation process
+RUN mkdir -p /tmp/uv && \
+    cd /tmp/uv && \
     echo "Downloading uv for ARM64..." && \
     curl -L -o uv.tar.gz https://github.com/astral-sh/uv/releases/download/0.5.24/uv-aarch64-unknown-linux-gnu.tar.gz && \
     tar xzf uv.tar.gz --strip-components=1 && \
@@ -26,7 +30,8 @@ RUN mkdir -p /tmp/uv && cd /tmp/uv && \
     file uv && \
     mv uv /usr/local/bin/ && \
     chmod +x /usr/local/bin/uv && \
-    cd / && rm -rf /tmp/uv
+    cd / && \
+    rm -rf /tmp/uv
 
 # Create non-root user
 RUN useradd -m -u 1000 appuser
@@ -58,6 +63,7 @@ WORKDIR /app
 COPY --chown=appuser:appuser pyproject.toml ./pyproject.toml
 
 # Install dependencies using pip for initial setup
+# Each command is connected with && and uses line continuations
 RUN python -m pip install --user pip uv && \
     echo "UV path: $(which uv)" && \
     $HOME/.local/bin/uv venv && \
